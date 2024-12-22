@@ -95,3 +95,12 @@ react-hot-toast
 Lightweight notification library for React.
 Displays toast notifications for success, error, or information messages.
 Easy to integrate and highly customizable.
+
+
+
+
+=============================
+
+plugin to sort the import
+
+npm i eslint-plugin-simple-import-sort
