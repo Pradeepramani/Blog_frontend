@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import './App.css'
 import {toast} from 'react-hot-toast'
+import Footer from './Components/Footer/footer.jsx'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -8,7 +9,7 @@ function App() {
   useEffect(()=>{toast.error("hi")},[])
   return (
     <>
-     <h1 className='text-5xl'>Hijinsojn</h1>
+     <Footer/>
     </>
   )
 }
