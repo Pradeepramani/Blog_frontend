@@ -8,24 +8,15 @@ import { createAccount } from "../redux/slices/authSlice";
 
 function Signup() {
     const navigate = useNavigate();
-    const dispach=useDispatch()
+    const dispatch = useDispatch(); // Fixed typo
     const [state, setState] = useState({
         name: "",
         email: "",
         password: "",
-        avatar: "",
+        avatar: "", // Change to null to properly handle file
     });
 
-    const [previous, setPrevious] = useState();
-
-    function createAcc(e) {
-        e.preventDefault();
-        if (!state.avatar || !state.name || !state.email || !state.password) {
-            toast.error("All fields are mandatory");
-            return;
-        }
-        console.log(state)
-    }
+    const [previous, setPrevious] = useState("");
 
     function handleChange(e) {
         const { name, value } = e.target;
@@ -34,34 +25,46 @@ function Signup() {
             ...state,
             [name]: value,
         });
-        
-        
     }
-     
-   async function onformsubmit()
-    {
-        const respone=await createAccount(state)
-        if(respone?.payload?.success)
-        {
-            navigate("/")
+
+    async function onformsubmit(e) {
+        e.preventDefault(); // Prevent form's default submit behavior
+    
+        if (!state.name || !state.email || !state.password) {
+            toast.error("All fields are mandatory");
+            return;
         }
-       setState ({
-            name: "",
-            email: "",
-            password: "",
-            avatar: "",
-        });
-
-        setPrevious("")
+    
+        const formData = new FormData();
+        formData.append("name", state.name);
+        formData.append("email", state.email);
+        formData.append("password", state.password);
+        if (state.avatar) {
+            formData.append("avatar", state.avatar);
+        }
+    
+        try {
+            const response = await dispatch(createAccount(formData));
+    
+            if (response.meta.requestStatus === "fulfilled") {
+                toast.success("Account created successfully!");
+                navigate("/about");
+                setState({
+                    email: "",
+                    name: "",
+                    password: "",
+                    avatar: null,
+                });
+                setPrevious("");
+            } else {
+                toast.error(response.payload || "Account creation failed");
+            }
+        } catch (error) {
+            console.error("Unexpected error:", error);
+            toast.error("An unexpected error occurred");
+        }
     }
-
-
-
-
-
-
-
-
+    
     function imageHandler(e) {
         e.preventDefault();
         const uploadImage = e.target.files[0];
@@ -75,27 +78,24 @@ function Signup() {
         const fileReader = new FileReader();
         fileReader.readAsDataURL(uploadImage);
         fileReader.addEventListener("load", function () {
-            setPrevious(this.result);
+            setPrevious(this.result); // Preview the uploaded image
         });
-
     }
-
 
     return (
         <>
             <Homelayout>
                 <div style={{ minHeight: "90vh" }}>
                     <form onSubmit={onformsubmit} style={{ position: "absolute", top: "50px", left: "400px" }}>
-                        <label htmlFor="image_upload" style={{ margin: "50px" }}>
+                        <label htmlFor="imageupload" style={{ margin: "50px" }}>
                             {previous ? <img src={previous} alt="Preview" /> : <BsSquare />}
                         </label>
-                        {/* Removed value attribute here */}
                         <input
                             type="file"
                             className="hidden"
                             onChange={imageHandler}
                             name="avatar"
-                            id="image_upload"
+                            id="imageupload"
                             accept=".jpg, .png, .jpeg"
                         />
                         <label htmlFor="namefield">
@@ -128,7 +128,7 @@ function Signup() {
                                 placeholder="Enter the password"
                             />
                         </label>
-                        <button onClick={createAcc}>Create account</button>
+                        <button type="submit">Create account</button>
                         <p>
                             Already have an account? <Link to="/login">Login</Link>
                         </p>
